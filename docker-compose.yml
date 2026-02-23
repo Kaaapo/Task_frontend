@@ -1,13 +1,17 @@
 version: '3.8'
 
 # ─────────────────────────────────────────────────────────────────
+#  Nombre del proyecto (grupo en Docker Desktop): task
+#
 #  USO:
 #    Solo frontend (backend ya corriendo en localhost:8080):
 #      docker-compose up frontend
 #
 #    Stack completo (postgres + backend + frontend):
-#      docker-compose --profile fullstack up
+#      docker-compose --profile fullstack up --build
 # ─────────────────────────────────────────────────────────────────
+
+name: task
 
 services:
 
@@ -15,7 +19,7 @@ services:
   postgres:
     profiles: [fullstack]
     image: postgres:15-alpine
-    container_name: taskmanager_postgres
+    container_name: PostgreSQL
     environment:
       POSTGRES_DB: taskmanager_db
       POSTGRES_USER: postgres
@@ -24,7 +28,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../Task_backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - taskmanager_network
     healthcheck:
@@ -37,7 +40,7 @@ services:
   backend:
     profiles: [fullstack]
     build: ../Task_backend
-    container_name: taskmanager_backend
+    container_name: Task_backend
     ports:
       - "8080:8080"
     environment:
@@ -53,7 +56,7 @@ services:
   # ── Frontend React/Nginx ─────────────────────────────────────────
   frontend:
     build: .
-    container_name: taskmanager_frontend
+    container_name: Task_frontend
     ports:
       - "80:80"
     depends_on:
