@@ -1,77 +1,87 @@
-/**
- * @file axiosConfig.js
- * @description Configuración de Axios para futuras conexiones con el backend
- * Este archivo está preparado para conectarse con un backend REST API
- */
-
 import axios from 'axios';
 
-// URL base del API - Por ahora apunta a localhost, cambiar cuando el backend esté disponible
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
-/**
- * Instancia de Axios configurada con la URL base del API
- */
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 segundos de timeout
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
-/**
- * Interceptor de solicitud
- * Aquí se pueden agregar headers adicionales, tokens de autenticación, etc.
- */
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
+  });
+  failedQueue = [];
+};
+
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Ejemplo: Si en el futuro se implementa autenticación
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    
-    console.log('📡 Request:', config.method?.toUpperCase(), config.url);
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
-  (error) => {
-    console.error('❌ Request Error:', error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-/**
- * Interceptor de respuesta
- * Manejo centralizado de respuestas y errores
- */
 axiosInstance.interceptors.response.use(
-  (response) => {
-    console.log('✅ Response:', response.config.url, response.status);
-    return response;
-  },
-  (error) => {
-    console.error('❌ Response Error:', error.response?.status, error.message);
-    
-    // Manejo de errores comunes
-    if (error.response) {
-      switch (error.response.status) {
-        case 404:
-          console.warn('Recurso no encontrado');
-          break;
-        case 500:
-          console.error('Error del servidor');
-          break;
-        default:
-          console.error('Error en la petición');
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosInstance(originalRequest);
+        });
       }
-    } else if (error.request) {
-      console.error('No se recibió respuesta del servidor');
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        isRefreshing = false;
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+        localStorage.setItem('token', data.token);
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
+        }
+        axiosInstance.defaults.headers.common.Authorization = `Bearer ${data.token}`;
+        processQueue(null, data.token);
+        originalRequest.headers.Authorization = `Bearer ${data.token}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
-    
+
     return Promise.reject(error);
   }
 );
 
 export default axiosInstance;
-

@@ -1,173 +1,230 @@
 import { useState, useEffect } from 'react';
-import { proyectosService } from '../shared/services/proyectosService';
-import { empresasService } from '../shared/services/empresasService';
-import { estadosService } from '../shared/services/estadosService';
-import { sistemasService } from '../shared/services/sistemasService';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  FolderKanban,
+  Building2,
+  ListChecks,
+  Tags,
+  ArrowRight,
+  Clock,
+  TrendingUp,
+} from 'lucide-react';
+import { proyectosService, empresasService, tareasService, etiquetasService } from '../shared/services';
+import { useAuth } from '../context/AuthContext';
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function Dashboard() {
-  const [proyectos, setProyectos] = useState([]);
-  const [empresas, setEmpresas] = useState([]);
-  const [estados, setEstados] = useState([]);
-  const [sistemas, setSistemas] = useState([]);
+  const { user } = useAuth();
+  const [data, setData] = useState({ proyectos: [], empresas: [], tareas: [], etiquetas: [] });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        setLoading(true);
-        const [proyectosData, empresasData, estadosData, sistemasData] = await Promise.all([
+        const [proyectos, empresas, tareas, etiquetas] = await Promise.all([
           proyectosService.getAll(),
           empresasService.getAll(),
-          estadosService.getAll(),
-          sistemasService.getAll(),
+          tareasService.getAll(),
+          etiquetasService.getAll(),
         ]);
-        setProyectos(proyectosData);
-        setEmpresas(empresasData);
-        setEstados(estadosData);
-        setSistemas(sistemasData);
+        setData({ proyectos, empresas, tareas, etiquetas });
       } catch (err) {
-        setError('No se pudo conectar con el backend. Verifica que el servidor esté corriendo.');
-        console.error(err);
+        console.error('Error cargando dashboard:', err);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, []);
 
   const stats = [
     {
-      title: 'Proyectos',
-      value: proyectos.length,
-      icon: '📋',
-      color: 'bg-blue-500',
-      subtitle: `${proyectos.filter(p => p.estadoNombre === 'En Proceso').length} en proceso`,
+      label: 'Proyectos',
+      value: data.proyectos.length,
+      icon: FolderKanban,
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-500/10',
+      link: '/proyectos',
     },
     {
-      title: 'Empresas',
-      value: empresas.length,
-      icon: '🏢',
-      color: 'bg-green-500',
-      subtitle: `${empresas.filter(e => e.estadoNombre === 'Activo').length} activas`,
+      label: 'Empresas',
+      value: data.empresas.length,
+      icon: Building2,
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      link: '/empresas',
     },
     {
-      title: 'Estados',
-      value: estados.length,
-      icon: '🎯',
-      color: 'bg-yellow-500',
-      subtitle: 'Configurados',
+      label: 'Tareas',
+      value: data.tareas.length,
+      icon: ListChecks,
+      color: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-50 dark:bg-amber-500/10',
+      link: '/tareas',
     },
     {
-      title: 'Sistemas',
-      value: sistemas.length,
-      icon: '💻',
-      color: 'bg-purple-500',
-      subtitle: 'Registrados',
+      label: 'Etiquetas',
+      value: data.etiquetas.length,
+      icon: Tags,
+      color: 'text-violet-600 dark:text-violet-400',
+      bg: 'bg-violet-50 dark:bg-violet-500/10',
+      link: '/etiquetas',
     },
   ];
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-64">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Cargando datos...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-          <p className="text-red-600 dark:text-red-400 text-lg font-medium">⚠️ Error de conexión</p>
-          <p className="text-red-500 dark:text-red-300 mt-2 text-sm">{error}</p>
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Cargando dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 dark:text-white transition-colors">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2 transition-colors">Resumen general del sistema</p>
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Welcome */}
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white">
+          Hola, {user?.nombre} {user?.apellido}
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Aqui tienes un resumen de tu espacio de trabajo</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 hover:shadow-lg transition-all duration-200"
-            style={{ borderLeftColor: stat.color.replace('bg-', '') }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-medium uppercase transition-colors">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2 transition-colors">{stat.value}</p>
-                <p className="text-gray-500 dark:text-gray-500 text-xs mt-1 transition-colors">{stat.subtitle}</p>
-              </div>
-              <div className={`text-5xl ${stat.color} bg-opacity-20 dark:bg-opacity-30 p-4 rounded-full`}>
-                {stat.icon}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Stats */}
+      <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s) => {
+          const Icon = s.icon;
+          return (
+            <motion.div key={s.label} variants={item}>
+              <Link
+                to={s.link}
+                className="block bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700/50 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${s.color}`} />
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors" />
+                </div>
+                <p className="text-3xl font-bold text-slate-800 dark:text-white">{s.value}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{s.label}</p>
+              </Link>
+            </motion.div>
+          );
+        })}
+      </motion.div>
 
+      {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 transition-colors">📋 Proyectos Recientes</h2>
+        {/* Recent projects */}
+        <motion.div variants={item} initial="hidden" animate="show" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+              <FolderKanban className="w-5 h-5 text-blue-500" />
+              Proyectos recientes
+            </h2>
+            <Link to="/proyectos" className="text-sm text-blue-500 hover:text-blue-600 font-medium">
+              Ver todos
+            </Link>
+          </div>
           <div className="space-y-3">
-            {proyectos.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">No hay proyectos registrados</p>
+            {data.proyectos.length === 0 ? (
+              <p className="text-slate-400 text-sm text-center py-6">No hay proyectos</p>
             ) : (
-              proyectos.slice(0, 5).map((proyecto) => (
-                <div key={proyecto.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-white transition-colors">{proyecto.nombre}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{proyecto.descripcion}</p>
+              data.proyectos.slice(0, 5).map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-800 dark:text-white truncate">{p.nombre}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{p.empresaNombre || 'Sin empresa'}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    proyecto.estadoNombre === 'En Proceso'
-                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                      : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}>
-                    {proyecto.estadoNombre || 'Sin estado'}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {p.prioridad && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        p.prioridad === 'ALTA' || p.prioridad === 'CRITICA'
+                          ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                          : p.prioridad === 'MEDIA'
+                          ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                          : 'bg-slate-100 dark:bg-slate-600/50 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {p.prioridad}
+                      </span>
+                    )}
+                    {p.estadoNombre && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
+                        {p.estadoNombre}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 transition-colors">🏢 Empresas</h2>
+        {/* Recent tasks */}
+        <motion.div variants={item} initial="hidden" animate="show" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-amber-500" />
+              Tareas recientes
+            </h2>
+            <Link to="/tareas" className="text-sm text-blue-500 hover:text-blue-600 font-medium">
+              Ver todas
+            </Link>
+          </div>
           <div className="space-y-3">
-            {empresas.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">No hay empresas registradas</p>
+            {data.tareas.length === 0 ? (
+              <p className="text-slate-400 text-sm text-center py-6">No hay tareas</p>
             ) : (
-              empresas.map((empresa) => (
-                <div key={empresa.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-white transition-colors">{empresa.nombre}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{empresa.correo}</p>
+              data.tareas.slice(0, 5).map((t) => (
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-800 dark:text-white truncate">{t.titulo}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" />
+                      {t.fechaLimite ? new Date(t.fechaLimite).toLocaleDateString() : 'Sin fecha'}
+                    </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    empresa.estadoNombre === 'Activo'
-                      ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
-                      : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
-                  }`}>
-                    {empresa.estadoNombre || 'Sin estado'}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {t.prioridad && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        t.prioridad === 'ALTA' || t.prioridad === 'CRITICA'
+                          ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                          : t.prioridad === 'MEDIA'
+                          ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                          : 'bg-slate-100 dark:bg-slate-600/50 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {t.prioridad}
+                      </span>
+                    )}
+                    {t.estadoNombre && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium">
+                        {t.estadoNombre}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

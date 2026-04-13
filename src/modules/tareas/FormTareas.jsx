@@ -2,33 +2,29 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Save } from 'lucide-react';
 
-export default function FormProyectos({ onClose, onSave, initialData, empresas, tiposProyecto, estados }) {
+export default function FormTareas({ onClose, onSave, initialData, proyectos, estados, etiquetas }) {
   const [form, setForm] = useState({
-    nombre: '',
+    titulo: '',
     descripcion: '',
-    codigo: '',
     prioridad: 'MEDIA',
-    fechaInicio: '',
-    fechaFinEstimada: '',
-    empresaId: '',
-    tipoProyectoId: '',
+    fechaLimite: '',
+    proyectoId: '',
     estadoId: '',
-    progreso: 0,
+    etiquetaIds: [],
+    orden: 0,
   });
 
   useEffect(() => {
     if (initialData) {
       setForm({
-        nombre: initialData.nombre || '',
+        titulo: initialData.titulo || '',
         descripcion: initialData.descripcion || '',
-        codigo: initialData.codigo || '',
         prioridad: initialData.prioridad || 'MEDIA',
-        fechaInicio: initialData.fechaInicio || '',
-        fechaFinEstimada: initialData.fechaFinEstimada || '',
-        empresaId: initialData.empresaId || '',
-        tipoProyectoId: initialData.tipoProyectoId || '',
+        fechaLimite: initialData.fechaLimite || '',
+        proyectoId: initialData.proyectoId || '',
         estadoId: initialData.estadoId || '',
-        progreso: initialData.progreso || 0,
+        etiquetaIds: initialData.etiquetaIds || [],
+        orden: initialData.orden || 0,
       });
     }
   }, [initialData]);
@@ -37,11 +33,19 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
     e.preventDefault();
     onSave({
       ...form,
-      progreso: Number(form.progreso),
-      empresaId: form.empresaId || null,
-      tipoProyectoId: form.tipoProyectoId || null,
+      orden: Number(form.orden),
+      proyectoId: form.proyectoId || null,
       estadoId: form.estadoId || null,
     });
+  };
+
+  const toggleEtiqueta = (id) => {
+    setForm((prev) => ({
+      ...prev,
+      etiquetaIds: prev.etiquetaIds.includes(id)
+        ? prev.etiquetaIds.filter((i) => i !== id)
+        : [...prev.etiquetaIds, id],
+    }));
   };
 
   const inputClass = 'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all';
@@ -63,7 +67,7 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-            {initialData ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+            {initialData ? 'Editar Tarea' : 'Nueva Tarea'}
           </h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
             <X className="w-5 h-5" />
@@ -73,14 +77,9 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Nombre <span className="text-red-500">*</span>
+              Titulo <span className="text-red-500">*</span>
             </label>
-            <input required value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Codigo</label>
-            <input value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} className={inputClass} placeholder="PRY-001" />
+            <input required value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} className={inputClass} />
           </div>
 
           <div>
@@ -95,22 +94,12 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Empresa</label>
-              <select value={form.empresaId} onChange={(e) => setForm({ ...form, empresaId: e.target.value })} className={inputClass}>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Proyecto</label>
+              <select value={form.proyectoId} onChange={(e) => setForm({ ...form, proyectoId: e.target.value })} className={inputClass}>
                 <option value="">Seleccionar...</option>
-                {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                {proyectos.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo</label>
-              <select value={form.tipoProyectoId} onChange={(e) => setForm({ ...form, tipoProyectoId: e.target.value })} className={inputClass}>
-                <option value="">Seleccionar...</option>
-                {tiposProyecto.map((t) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado</label>
               <select value={form.estadoId} onChange={(e) => setForm({ ...form, estadoId: e.target.value })} className={inputClass}>
@@ -118,6 +107,9 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
                 {estados.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
               </select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Prioridad</label>
               <select value={form.prioridad} onChange={(e) => setForm({ ...form, prioridad: e.target.value })} className={inputClass}>
@@ -127,23 +119,34 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
                 <option value="CRITICA">Critica</option>
               </select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha inicio</label>
-              <input type="date" value={form.fechaInicio} onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })} className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha fin estimada</label>
-              <input type="date" value={form.fechaFinEstimada} onChange={(e) => setForm({ ...form, fechaFinEstimada: e.target.value })} className={inputClass} />
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha limite</label>
+              <input type="date" value={form.fechaLimite} onChange={(e) => setForm({ ...form, fechaLimite: e.target.value })} className={inputClass} />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Progreso (%)</label>
-            <input type="number" min="0" max="100" value={form.progreso} onChange={(e) => setForm({ ...form, progreso: e.target.value })} className={inputClass} />
-          </div>
+          {etiquetas.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Etiquetas</label>
+              <div className="flex flex-wrap gap-2">
+                {etiquetas.map((et) => (
+                  <button
+                    key={et.id}
+                    type="button"
+                    onClick={() => toggleEtiqueta(et.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                      form.etiquetaIds.includes(et.id)
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                        : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
+                    }`}
+                  >
+                    <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: et.color || '#6366f1' }} />
+                    {et.nombre}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4">
             <button type="button" onClick={onClose} className="px-4 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">

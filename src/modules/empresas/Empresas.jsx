@@ -1,123 +1,181 @@
-/**
- * @file Empresas.jsx
- * @description Componente principal para la gestión de empresas
- */
-
 import { useState, useEffect } from 'react';
-import GridEmpresas from './GridEmpresas';
-import FormEmpresas from './FormEmpresas';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Pencil, Trash2, Building2, Search, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { empresasService, estadosService } from '../../shared/services';
+import FormEmpresas from './FormEmpresas';
 
 export default function Empresas() {
   const [empresas, setEmpresas] = useState([]);
   const [estados, setEstados] = useState([]);
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState('create');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const [editItem, setEditItem] = useState(null);
+  const [search, setSearch] = useState('');
 
   const loadData = async () => {
-    setLoading(true);
     try {
-      const [empresasData, estadosData] = await Promise.all([
-        empresasService.getAll(),
-        estadosService.getAll()
-      ]);
-      setEmpresas(empresasData);
-      setEstados(estadosData);
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-      alert('Error al cargar los datos');
-    }
-    setLoading(false);
-  };
-
-  const handleCreate = () => {
-    setFormMode('create');
-    setSelectedRow(null);
-    setFormOpen(true);
-  };
-
-  const handleEdit = () => {
-    if (!selectedRow) return;
-    setFormMode('edit');
-    setFormOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedRow) return;
-    if (!window.confirm(`¿Eliminar la empresa "${selectedRow.nombre}"?`)) return;
-    
-    try {
-      await empresasService.delete(selectedRow.id);
-      await loadData();
-      setSelectedRow(null);
-      alert('Empresa eliminada correctamente');
-    } catch (error) {
-      console.error('Error eliminando empresa:', error);
-      alert('Error al eliminar la empresa');
+      const [e, est] = await Promise.all([empresasService.getAll(), estadosService.getAll()]);
+      setEmpresas(e);
+      setEstados(est);
+    } catch {
+      toast.error('Error al cargar empresas');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFormSubmit = async (data) => {
+  useEffect(() => { loadData(); }, []);
+
+  const handleDelete = async (empresa) => {
+    if (!confirm(`Eliminar la empresa "${empresa.nombre}"?`)) return;
     try {
-      if (formMode === 'create') {
-        await empresasService.create(data);
-        alert('Empresa creada correctamente');
+      await empresasService.delete(empresa.id);
+      toast.success('Empresa eliminada');
+      loadData();
+    } catch {
+      toast.error('Error al eliminar');
+    }
+  };
+
+  const handleSave = async (data) => {
+    try {
+      if (editItem) {
+        await empresasService.update(editItem.id, data);
+        toast.success('Empresa actualizada');
       } else {
-        await empresasService.update(selectedRow.id, data);
-        alert('Empresa actualizada correctamente');
+        await empresasService.create(data);
+        toast.success('Empresa creada');
       }
-      await loadData();
       setFormOpen(false);
-      setSelectedRow(null);
-    } catch (error) {
-      console.error('Error guardando empresa:', error);
-      alert('Error al guardar la empresa');
+      setEditItem(null);
+      loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error al guardar');
     }
   };
+
+  const filtered = empresas.filter(
+    (e) =>
+      e.nombre?.toLowerCase().includes(search.toLowerCase()) ||
+      e.nit?.toLowerCase().includes(search.toLowerCase()) ||
+      e.sector?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white transition-colors">Gestión de Empresas</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2 transition-colors">Administra las empresas del sistema</p>
-      </div>
-
-      <div className="mb-4 flex gap-3">
-        <button onClick={handleCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-          Crear Empresa
-        </button>
-        <button onClick={handleEdit} disabled={!selectedRow} className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          Editar
-        </button>
-        <button onClick={handleDelete} disabled={!selectedRow} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          Eliminar
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-10">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 dark:border-blue-400 border-t-transparent"></div>
-          <p className="mt-2 text-gray-600 dark:text-gray-400 transition-colors">Cargando...</p>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Empresas</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{empresas.length} empresas registradas</p>
         </div>
-      ) : (
-        <GridEmpresas empresas={empresas} onRowSelect={setSelectedRow} />
+        <button
+          onClick={() => { setEditItem(null); setFormOpen(true); }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Nueva Empresa
+        </button>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nombre, NIT o sector..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <AnimatePresence>
+          {filtered.map((empresa) => (
+            <motion.div
+              key={empresa.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-5 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-800 dark:text-white">{empresa.nombre}</h3>
+                    {empresa.sector && <p className="text-xs text-slate-500 dark:text-slate-400">{empresa.sector}</p>}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => { setEditItem(empresa); setFormOpen(true); }}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-blue-500 transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(empresa)}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {empresa.descripcion && (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">{empresa.descripcion}</p>
+              )}
+
+              <div className="flex flex-wrap gap-2 text-xs">
+                {empresa.nit && (
+                  <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 rounded-lg">
+                    NIT: {empresa.nit}
+                  </span>
+                )}
+                {empresa.correo && (
+                  <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 rounded-lg">
+                    {empresa.correo}
+                  </span>
+                )}
+                {empresa.estadoNombre && (
+                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg font-medium">
+                    {empresa.estadoNombre}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12">
+          <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400">No se encontraron empresas</p>
+        </div>
       )}
 
-      <FormEmpresas
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        mode={formMode}
-        initialData={selectedRow}
-        onSubmit={handleFormSubmit}
-        estados={estados}
-      />
+      <AnimatePresence>
+        {formOpen && (
+          <FormEmpresas
+            onClose={() => { setFormOpen(false); setEditItem(null); }}
+            onSave={handleSave}
+            initialData={editItem}
+            estados={estados}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

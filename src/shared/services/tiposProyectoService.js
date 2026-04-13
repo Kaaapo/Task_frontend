@@ -2,27 +2,22 @@ import axiosInstance from '../config/axiosConfig';
 
 export const tiposProyectoService = {
   getAll: async () => {
-    const response = await axiosInstance.get('/tipos-proyecto');
-    return response.data;
+    const { data } = await axiosInstance.get('/tipos-proyecto');
+    return data;
   },
-
   getById: async (id) => {
-    const response = await axiosInstance.get(`/tipos-proyecto/${id}`);
-    return response.data;
+    const { data } = await axiosInstance.get(`/tipos-proyecto/${id}`);
+    return data;
   },
-
-  create: async (data) => {
-    const response = await axiosInstance.post('/tipos-proyecto', data);
-    return response.data;
+  create: async (tipo) => {
+    const { data } = await axiosInstance.post('/tipos-proyecto', tipo);
+    return data;
   },
-
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/tipos-proyecto/${id}`, data);
-    return response.data;
+  update: async (id, tipo) => {
+    const { data } = await axiosInstance.put(`/tipos-proyecto/${id}`, tipo);
+    return data;
   },
-
   delete: async (id) => {
-    const response = await axiosInstance.delete(`/tipos-proyecto/${id}`);
-    return response.data;
+    await axiosInstance.delete(`/tipos-proyecto/${id}`);
   },
 };

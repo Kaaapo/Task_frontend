@@ -2,27 +2,26 @@ import axiosInstance from '../config/axiosConfig';
 
 export const proyectosService = {
   getAll: async () => {
-    const response = await axiosInstance.get('/proyectos');
-    return response.data;
+    const { data } = await axiosInstance.get('/proyectos');
+    return data;
   },
-
   getById: async (id) => {
-    const response = await axiosInstance.get(`/proyectos/${id}`);
-    return response.data;
+    const { data } = await axiosInstance.get(`/proyectos/${id}`);
+    return data;
   },
-
-  create: async (data) => {
-    const response = await axiosInstance.post('/proyectos', data);
-    return response.data;
+  getByEmpresa: async (empresaId) => {
+    const { data } = await axiosInstance.get(`/proyectos/empresa/${empresaId}`);
+    return data;
   },
-
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/proyectos/${id}`, data);
-    return response.data;
+  create: async (proyecto) => {
+    const { data } = await axiosInstance.post('/proyectos', proyecto);
+    return data;
   },
-
+  update: async (id, proyecto) => {
+    const { data } = await axiosInstance.put(`/proyectos/${id}`, proyecto);
+    return data;
+  },
   delete: async (id) => {
-    const response = await axiosInstance.delete(`/proyectos/${id}`);
-    return response.data;
+    await axiosInstance.delete(`/proyectos/${id}`);
   },
 };

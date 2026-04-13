@@ -1,138 +1,213 @@
-/**
- * @file Layout.jsx
- * @description Layout principal de la aplicación sin autenticación
- */
-
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Building2,
+  ListChecks,
+  Tags,
+  Settings,
+  ChevronLeft,
+  Menu,
+  Moon,
+  Sun,
+  LogOut,
+  User,
+  Layers,
+  X,
+} from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
-const Layout = ({ children }) => {
+const navItems = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/empresas', label: 'Empresas', icon: Building2 },
+  { path: '/proyectos', label: 'Proyectos', icon: FolderKanban },
+  { path: '/tareas', label: 'Tareas', icon: ListChecks },
+  { path: '/etiquetas', label: 'Etiquetas', icon: Tags },
+  { path: '/estados', label: 'Estados', icon: Layers },
+  { path: '/tipo-proyecto', label: 'Tipos de Proyecto', icon: Settings },
+];
+
+export default function Layout({ children }) {
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { darkMode, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
-  const menuItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/proyectos', label: 'Proyectos', icon: '📋' },
-    { path: '/empresas', label: 'Empresas', icon: '🏢' },
-    { path: '/tipo-proyecto', label: 'Tipos de Proyecto', icon: '📁' },
-    { path: '/estados', label: 'Estados', icon: '🎯' },
-    { path: '/fases', label: 'Fases', icon: '⚙️' },
-    { path: '/sistemas', label: 'Sistemas', icon: '💻' },
-    { path: '/subsistemas', label: 'Subsistemas', icon: '🔧' },
-    { path: '/ramas', label: 'Ramas', icon: '🌳' },
-  ];
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
-  return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-      {/* Header */}
-      <nav className="bg-white dark:bg-gray-800 shadow-lg transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="mr-4 md:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-white transition-colors">
-                Task Manager
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleTheme}
-                type="button"
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                aria-label={darkMode ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
-              >
-                {darkMode ? (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                      />
-                    </svg>
-                    <span>Modo Oscuro</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                    <span>Modo Claro</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-slate-200 dark:border-slate-700/50">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+          <FolderKanban className="w-5 h-5 text-white" />
         </div>
+        {!collapsed && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="font-bold text-slate-800 dark:text-white text-lg whitespace-nowrap"
+          >
+            TaskManager
+          </motion.span>
+        )}
+      </div>
+
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                active
+                  ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+              {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside
-          className={`${
-            sidebarOpen ? 'block' : 'hidden'
-          } md:block w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen transition-colors duration-200`}
+      <div className="border-t border-slate-200 dark:border-slate-700/50 p-3 space-y-1">
+        <Link
+          to="/perfil"
+          onClick={() => setMobileOpen(false)}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            location.pathname === '/perfil'
+              ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+          }`}
         >
-          <nav className="mt-5 px-2">
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 transition duration-200 ${
-                  location.pathname === item.path
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <span className="mr-3 text-xl">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
+          <User className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Perfil</span>}
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all w-full"
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Cerrar sesion</span>}
+        </button>
+      </div>
+    </div>
+  );
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-          <div className="max-w-7xl mx-auto">{children}</div>
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile sidebar */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 left-0 z-50 w-[280px] h-screen bg-white dark:bg-slate-800 shadow-xl lg:hidden"
+          >
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <SidebarContent />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop sidebar */}
+      <aside
+        className={`hidden lg:flex flex-col fixed top-0 left-0 z-30 h-screen bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/50 transition-all duration-300 ${
+          collapsed ? 'w-[72px]' : 'w-[260px]'
+        }`}
+      >
+        <SidebarContent />
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors shadow-sm"
+        >
+          <ChevronLeft className={`w-3.5 h-3.5 text-slate-600 dark:text-slate-300 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
+        </button>
+      </aside>
+
+      {/* Main content */}
+      <div className={`transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'}`}>
+        {/* Header */}
+        <header className="sticky top-0 z-20 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-700/50">
+          <div className="flex items-center justify-between h-full px-4 lg:px-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="lg:hidden text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
+                {navItems.find((i) => i.path === location.pathname)?.label || 'Task Manager'}
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                {darkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+              </button>
+              <Link
+                to="/perfil"
+                className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
+                  {user?.nombre} {user?.apellido}
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                  {user?.nombre?.[0]}{user?.apellido?.[0]}
+                </div>
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="p-4 lg:p-6">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {children}
+          </motion.div>
         </main>
       </div>
     </div>
   );
-};
-
-export default Layout;
+}
