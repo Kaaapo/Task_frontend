@@ -8,7 +8,7 @@ const API_URL = rawBase
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+  timeout: 60000,
 });
 
 let isRefreshing = false;
