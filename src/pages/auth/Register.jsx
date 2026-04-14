@@ -68,8 +68,12 @@ export default function Register() {
     setLoading(true);
     try {
       const { confirmPassword, ...registroData } = form;
-      await register(registroData);
-      toast.success('¡Registro exitoso! Revisa tu correo para verificar tu cuenta.');
+      const data = await register(registroData);
+      if (data?.correoEnviado === false) {
+        toast.warning(data?.mensaje || 'Cuenta creada, pero no se pudo enviar el correo de verificación.');
+      } else {
+        toast.success('¡Registro exitoso! Revisa tu correo para verificar tu cuenta.');
+      }
       navigate('/login');
     } catch (error) {
       const serverFieldErrors = getFieldErrors(error);

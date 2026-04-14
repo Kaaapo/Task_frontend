@@ -66,8 +66,12 @@ export default function VerifyEmail() {
     e.preventDefault();
     setResending(true);
     try {
-      await reenviarVerificacion(resendEmail);
-      toast.success('Email de verificación reenviado');
+      const data = await reenviarVerificacion(resendEmail);
+      if (data?.correoEnviado === false) {
+        toast.warning(data?.mensaje || 'No se pudo enviar el correo. Revisa la configuración SMTP del servidor.');
+      } else {
+        toast.success('Email de verificación reenviado');
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, 'Error al reenviar el correo de verificación'));
     } finally {

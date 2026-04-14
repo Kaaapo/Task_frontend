@@ -22,7 +22,11 @@ export default function ForgotPassword() {
       const data = await solicitarReset(email);
       setSuccessMessage(data?.mensaje || 'Te hemos enviado un correo con instrucciones para restablecer tu contraseña.');
       setSent(true);
-      toast.success('Correo enviado');
+      if (data?.correoEnviado === false) {
+        toast.warning(data?.mensaje || 'No se pudo enviar el correo.');
+      } else {
+        toast.success('Correo enviado');
+      }
     } catch (error) {
       const msg = getErrorMessage(error, 'Error al solicitar la recuperación de contraseña');
       setErrorMessage(msg);
