@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, ListChecks, Search, Clock, MessageSquare, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { tareasService, proyectosService, estadosService, etiquetasService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormTareas from './FormTareas';
 import TareaDetalle from './TareaDetalle';
 
@@ -32,8 +33,8 @@ export default function Tareas() {
       setProyectos(p);
       setEstados(e);
       setEtiquetas(et);
-    } catch {
-      toast.error('Error al cargar datos');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar las tareas'));
     } finally {
       setLoading(false);
     }
@@ -47,8 +48,8 @@ export default function Tareas() {
       await tareasService.delete(tarea.id);
       toast.success('Tarea eliminada');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar la tarea'));
     }
   };
 
@@ -65,7 +66,7 @@ export default function Tareas() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar la tarea'));
     }
   };
 

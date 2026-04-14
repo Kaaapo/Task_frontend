@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, UserPlus, User, Phone } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, UserPlus, User, Phone, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage, getFieldErrors } from '../../shared/lib/errorUtils';
 
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
@@ -29,20 +32,36 @@ export default function Register() {
   ];
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => { const next = { ...prev }; delete next[name]; return next; });
+    }
+    if (generalError) setGeneralError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFieldErrors({});
+    setGeneralError('');
+
+    const localErrors = {};
+
+    if (!form.nombre.trim()) localErrors.nombre = 'El nombre es obligatorio';
+    if (!form.apellido.trim()) localErrors.apellido = 'El apellido es obligatorio';
+    if (!form.email.trim()) localErrors.email = 'El correo electrónico es obligatorio';
 
     if (form.password !== form.confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
-      return;
+      localErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
     const allValid = passwordRequirements.every((r) => r.test(form.password));
     if (!allValid) {
-      toast.error('La contraseña no cumple todos los requisitos');
+      localErrors.password = 'La contraseña no cumple todos los requisitos';
+    }
+
+    if (Object.keys(localErrors).length > 0) {
+      setFieldErrors(localErrors);
       return;
     }
 
@@ -50,15 +69,38 @@ export default function Register() {
     try {
       const { confirmPassword, ...registroData } = form;
       await register(registroData);
-      toast.success('Registro exitoso. Revisa tu correo para verificar tu cuenta.');
+      toast.success('¡Registro exitoso! Revisa tu correo para verificar tu cuenta.');
       navigate('/login');
     } catch (error) {
-      const msg = error.response?.data?.message || 'Error al registrarse';
-      toast.error(msg);
+      const serverFieldErrors = getFieldErrors(error);
+      if (serverFieldErrors) {
+        setFieldErrors(serverFieldErrors);
+      }
+      setGeneralError(getErrorMessage(error, 'Error al registrarse'));
     } finally {
       setLoading(false);
     }
   };
+
+  const FieldError = ({ name }) => {
+    const msg = fieldErrors[name];
+    if (!msg) return null;
+    return (
+      <motion.p
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-1 text-xs text-red-400 flex items-center gap-1"
+      >
+        <AlertTriangle className="w-3 h-3" />
+        {msg}
+      </motion.p>
+    );
+  };
+
+  const inputBorder = (name) =>
+    fieldErrors[name]
+      ? 'border-red-500/50 focus:ring-red-500'
+      : 'border-white/10 focus:ring-blue-500';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4 py-8">
@@ -82,6 +124,22 @@ export default function Register() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <AnimatePresence>
+            {generalError && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                className="rounded-xl border border-red-500/30 bg-red-500/10 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300 font-medium">{generalError}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -93,10 +151,11 @@ export default function Register() {
                     required
                     value={form.nombre}
                     onChange={handleChange}
-                    className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className={`w-full pl-11 pr-4 py-3 bg-white/5 border ${inputBorder('nombre')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                     placeholder="Juan"
                   />
                 </div>
+                <FieldError name="nombre" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Apellido *</label>
@@ -105,9 +164,10 @@ export default function Register() {
                   required
                   value={form.apellido}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  placeholder="Perez"
+                  className={`w-full px-4 py-3 bg-white/5 border ${inputBorder('apellido')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
+                  placeholder="Pérez"
                 />
+                <FieldError name="apellido" />
               </div>
             </div>
 
@@ -118,9 +178,10 @@ export default function Register() {
                   name="apodo"
                   value={form.apodo}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className={`w-full px-4 py-3 bg-white/5 border ${inputBorder('apodo')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                   placeholder="juanp"
                 />
+                <FieldError name="apodo" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Teléfono</label>
@@ -130,10 +191,11 @@ export default function Register() {
                     name="telefono"
                     value={form.telefono}
                     onChange={handleChange}
-                    className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className={`w-full pl-11 pr-4 py-3 bg-white/5 border ${inputBorder('telefono')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                     placeholder="+57 300..."
                   />
                 </div>
+                <FieldError name="telefono" />
               </div>
             </div>
 
@@ -147,10 +209,11 @@ export default function Register() {
                   required
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className={`w-full pl-11 pr-4 py-3 bg-white/5 border ${inputBorder('email')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                   placeholder="tu@email.com"
                 />
               </div>
+              <FieldError name="email" />
             </div>
 
             <div>
@@ -163,7 +226,7 @@ export default function Register() {
                   required
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className={`w-full pl-11 pr-12 py-3 bg-white/5 border ${inputBorder('password')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                   placeholder="********"
                 />
                 <button
@@ -174,6 +237,7 @@ export default function Register() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              <FieldError name="password" />
               {form.password && (
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, i) => (
@@ -196,13 +260,11 @@ export default function Register() {
                   required
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className={`w-full pl-11 pr-4 py-3 bg-white/5 border ${inputBorder('confirmPassword')} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all`}
                   placeholder="********"
                 />
               </div>
-              {form.confirmPassword && form.password !== form.confirmPassword && (
-                <p className="mt-1 text-xs text-red-400">Las contraseñas no coinciden</p>
-              )}
+              <FieldError name="confirmPassword" />
             </div>
 
             <motion.button

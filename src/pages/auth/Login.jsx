@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, LogIn, AlertTriangle, ShieldAlert, MailWarning, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage, getErrorCode, getErrorStatus } from '../../shared/lib/errorUtils';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,20 +12,63 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorInfo, setErrorInfo] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorInfo(null);
     setLoading(true);
     try {
       await login(form.email, form.password);
-      toast.success('Inicio de sesión exitoso');
+      toast.success('¡Inicio de sesión exitoso!');
       navigate('/dashboard');
     } catch (error) {
-      const msg = error.response?.data?.message || 'Error al iniciar sesión';
-      toast.error(msg);
+      const code = getErrorCode(error);
+      const status = getErrorStatus(error);
+      const msg = getErrorMessage(error, 'Error al iniciar sesión');
+
+      if (code === 'EMAIL_NOT_VERIFIED') {
+        setErrorInfo({
+          type: 'email-not-verified',
+          message: msg,
+          icon: MailWarning,
+        });
+      } else if (code === 'ACCOUNT_LOCKED') {
+        setErrorInfo({
+          type: 'account-locked',
+          message: msg,
+          icon: Clock,
+        });
+      } else if (code === 'BAD_CREDENTIALS' || status === 401) {
+        setErrorInfo({
+          type: 'bad-credentials',
+          message: msg,
+          icon: ShieldAlert,
+        });
+      } else if (!error.response) {
+        setErrorInfo({
+          type: 'network',
+          message: msg,
+          icon: AlertTriangle,
+        });
+      } else {
+        setErrorInfo({
+          type: 'generic',
+          message: msg,
+          icon: AlertTriangle,
+        });
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const errorColors = {
+    'email-not-verified': 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+    'account-locked': 'border-red-500/30 bg-red-500/10 text-red-300',
+    'bad-credentials': 'border-red-500/30 bg-red-500/10 text-red-300',
+    'network': 'border-orange-500/30 bg-orange-500/10 text-orange-300',
+    'generic': 'border-red-500/30 bg-red-500/10 text-red-300',
   };
 
   return (
@@ -49,6 +93,41 @@ export default function Login() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <AnimatePresence mode="wait">
+            {errorInfo && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                className={`rounded-xl border p-4 ${errorColors[errorInfo.type]}`}
+              >
+                <div className="flex items-start gap-3">
+                  <errorInfo.icon className="w-5 h-5 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{errorInfo.message}</p>
+                    {errorInfo.type === 'email-not-verified' && (
+                      <Link
+                        to="/verify-email"
+                        className="inline-block mt-2 text-xs font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors"
+                      >
+                        Reenviar correo de verificación
+                      </Link>
+                    )}
+                    {errorInfo.type === 'bad-credentials' && (
+                      <Link
+                        to="/forgot-password"
+                        className="inline-block mt-2 text-xs font-semibold text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico</label>
@@ -58,7 +137,7 @@ export default function Login() {
                   type="email"
                   required
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrorInfo(null); }}
                   className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="tucorreo@email.com"
                 />
@@ -73,7 +152,7 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) => { setForm({ ...form, password: e.target.value }); setErrorInfo(null); }}
                   className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="********"
                 />

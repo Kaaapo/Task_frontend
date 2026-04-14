@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -31,7 +32,7 @@ export default function ResetPassword() {
       toast.success('Contraseña cambiada exitosamente');
       navigate('/login');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al cambiar la contraseña');
+      toast.error(getErrorMessage(error, 'Error al cambiar la contraseña'));
     } finally {
       setLoading(false);
     }

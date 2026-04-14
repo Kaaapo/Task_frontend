@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -29,7 +30,7 @@ export default function VerifyEmail() {
       setMessage(data.mensaje || 'Email verificado correctamente');
     } catch (error) {
       setStatus('error');
-      setMessage(error.response?.data?.message || 'Error al verificar el email');
+      setMessage(getErrorMessage(error, 'Error al verificar el email'));
     }
   };
 
@@ -40,7 +41,7 @@ export default function VerifyEmail() {
       await reenviarVerificacion(resendEmail);
       toast.success('Email de verificación reenviado');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al reenviar');
+      toast.error(getErrorMessage(error, 'Error al reenviar el correo de verificación'));
     } finally {
       setResending(false);
     }

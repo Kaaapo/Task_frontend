@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { User, Mail, Phone, AtSign, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../shared/lib/errorUtils';
 
 export default function Perfil() {
   const { user, updateProfile } = useAuth();
@@ -26,7 +27,7 @@ export default function Perfil() {
       await updateProfile(form);
       toast.success('Perfil actualizado correctamente');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al actualizar perfil');
+      toast.error(getErrorMessage(error, 'Error al actualizar el perfil'));
     } finally {
       setLoading(false);
     }

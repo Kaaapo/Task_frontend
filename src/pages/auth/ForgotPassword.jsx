@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 
 export default function ForgotPassword() {
   const { solicitarReset } = useAuth();
@@ -19,7 +20,7 @@ export default function ForgotPassword() {
       setSent(true);
       toast.success('Se envió un enlace a tu correo');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al solicitar recuperación');
+      toast.error(getErrorMessage(error, 'Error al solicitar la recuperación de contraseña'));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Layers, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { estadosService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormEstados from './FormEstados';
 
 export default function Estados() {
@@ -15,8 +16,8 @@ export default function Estados() {
   const loadData = async () => {
     try {
       setEstados(await estadosService.getAll());
-    } catch {
-      toast.error('Error al cargar estados');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar los estados'));
     } finally {
       setLoading(false);
     }
@@ -30,8 +31,8 @@ export default function Estados() {
       await estadosService.delete(estado.id);
       toast.success('Estado eliminado');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar el estado'));
     }
   };
 
@@ -48,7 +49,7 @@ export default function Estados() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar el estado'));
     }
   };
 

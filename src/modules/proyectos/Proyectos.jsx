@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, FolderKanban, Search, Calendar, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { proyectosService, empresasService, tiposProyectoService, estadosService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormProyectos from './FormProyectos';
 
 export default function Proyectos() {
@@ -27,8 +28,8 @@ export default function Proyectos() {
       setEmpresas(e);
       setTiposProyecto(tp);
       setEstados(est);
-    } catch {
-      toast.error('Error al cargar datos');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar los proyectos'));
     } finally {
       setLoading(false);
     }
@@ -42,8 +43,8 @@ export default function Proyectos() {
       await proyectosService.delete(proyecto.id);
       toast.success('Proyecto eliminado');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar el proyecto'));
     }
   };
 
@@ -60,7 +61,7 @@ export default function Proyectos() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar el proyecto'));
     }
   };
 

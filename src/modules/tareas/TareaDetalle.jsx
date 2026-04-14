@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Pencil, Clock, User, FolderKanban, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { comentariosService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 
 export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
   const [comentarios, setComentarios] = useState([]);
@@ -17,8 +18,8 @@ export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
     try {
       const data = await comentariosService.getByTarea(tarea.id);
       setComentarios(data);
-    } catch {
-      // silently fail
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar los comentarios'));
     } finally {
       setLoadingComentarios(false);
     }
@@ -32,8 +33,8 @@ export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
       setNuevoComentario('');
       loadComentarios();
       toast.success('Comentario agregado');
-    } catch {
-      toast.error('Error al agregar comentario');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al agregar el comentario'));
     }
   };
 
@@ -43,8 +44,8 @@ export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
       await comentariosService.delete(tarea.id, comentarioId);
       loadComentarios();
       toast.success('Comentario eliminado');
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar el comentario'));
     }
   };
 

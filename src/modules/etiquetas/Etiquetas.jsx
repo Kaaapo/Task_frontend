@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Tags, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { etiquetasService, empresasService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormEtiquetas from './FormEtiquetas';
 
 export default function Etiquetas() {
@@ -18,8 +19,8 @@ export default function Etiquetas() {
       const [et, emp] = await Promise.all([etiquetasService.getAll(), empresasService.getAll()]);
       setEtiquetas(et);
       setEmpresas(emp);
-    } catch {
-      toast.error('Error al cargar etiquetas');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar las etiquetas'));
     } finally {
       setLoading(false);
     }
@@ -33,8 +34,8 @@ export default function Etiquetas() {
       await etiquetasService.delete(etiqueta.id);
       toast.success('Etiqueta eliminada');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar la etiqueta'));
     }
   };
 
@@ -51,7 +52,7 @@ export default function Etiquetas() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar la etiqueta'));
     }
   };
 

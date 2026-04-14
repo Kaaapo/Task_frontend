@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Settings, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { tiposProyectoService, estadosService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormTipoProyecto from './FormTipoProyecto';
 
 export default function TipoProyecto() {
@@ -18,8 +19,8 @@ export default function TipoProyecto() {
       const [t, e] = await Promise.all([tiposProyectoService.getAll(), estadosService.getAll()]);
       setTipos(t);
       setEstados(e);
-    } catch {
-      toast.error('Error al cargar datos');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar los tipos de proyecto'));
     } finally {
       setLoading(false);
     }
@@ -33,8 +34,8 @@ export default function TipoProyecto() {
       await tiposProyectoService.delete(tipo.id);
       toast.success('Tipo eliminado');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar el tipo de proyecto'));
     }
   };
 
@@ -51,7 +52,7 @@ export default function TipoProyecto() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar el tipo de proyecto'));
     }
   };
 

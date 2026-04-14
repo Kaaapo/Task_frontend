@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Building2, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { empresasService, estadosService } from '../../shared/services';
+import { getErrorMessage } from '../../shared/lib/errorUtils';
 import FormEmpresas from './FormEmpresas';
 
 export default function Empresas() {
@@ -18,8 +19,8 @@ export default function Empresas() {
       const [e, est] = await Promise.all([empresasService.getAll(), estadosService.getAll()]);
       setEmpresas(e);
       setEstados(est);
-    } catch {
-      toast.error('Error al cargar empresas');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al cargar las empresas'));
     } finally {
       setLoading(false);
     }
@@ -33,8 +34,8 @@ export default function Empresas() {
       await empresasService.delete(empresa.id);
       toast.success('Empresa eliminada');
       loadData();
-    } catch {
-      toast.error('Error al eliminar');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al eliminar la empresa'));
     }
   };
 
@@ -51,7 +52,7 @@ export default function Empresas() {
       setEditItem(null);
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al guardar');
+      toast.error(getErrorMessage(err, 'Error al guardar la empresa'));
     }
   };
 
