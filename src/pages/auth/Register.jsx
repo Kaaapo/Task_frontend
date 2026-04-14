@@ -24,11 +24,11 @@ export default function Register() {
   });
 
   const passwordRequirements = [
-    { label: 'Mínimo 8 caracteres', test: (p) => p.length >= 8 },
+    { label: 'Entre 8 y 128 caracteres, sin espacios', test: (p) => p.length >= 8 && p.length <= 128 && !/\s/.test(p) },
     { label: 'Una mayúscula', test: (p) => /[A-Z]/.test(p) },
     { label: 'Una minúscula', test: (p) => /[a-z]/.test(p) },
     { label: 'Un número', test: (p) => /[0-9]/.test(p) },
-    { label: 'Un carácter especial', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p) },
+    { label: 'Un símbolo (no letra ni número; p. ej. . @ #)', test: (p) => /[^A-Za-z0-9]/.test(p) },
   ];
 
   const handleChange = (e) => {
