@@ -42,7 +42,7 @@ export default function Tareas() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (tarea) => {
-    if (!confirm(`Eliminar la tarea "${tarea.titulo}"?`)) return;
+    if (!confirm(`¿Eliminar la tarea "${tarea.titulo}"?`)) return;
     try {
       await tareasService.delete(tarea.id);
       toast.success('Tarea eliminada');

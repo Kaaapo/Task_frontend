@@ -25,7 +25,7 @@ export default function Estados() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (estado) => {
-    if (!confirm(`Eliminar el estado "${estado.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar el estado "${estado.nombre}"?`)) return;
     try {
       await estadosService.delete(estado.id);
       toast.success('Estado eliminado');

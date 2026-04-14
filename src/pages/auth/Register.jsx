@@ -21,11 +21,11 @@ export default function Register() {
   });
 
   const passwordRequirements = [
-    { label: 'Minimo 8 caracteres', test: (p) => p.length >= 8 },
-    { label: 'Una mayuscula', test: (p) => /[A-Z]/.test(p) },
-    { label: 'Una minuscula', test: (p) => /[a-z]/.test(p) },
-    { label: 'Un numero', test: (p) => /[0-9]/.test(p) },
-    { label: 'Un caracter especial', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p) },
+    { label: 'Mínimo 8 caracteres', test: (p) => p.length >= 8 },
+    { label: 'Una mayúscula', test: (p) => /[A-Z]/.test(p) },
+    { label: 'Una minúscula', test: (p) => /[a-z]/.test(p) },
+    { label: 'Un número', test: (p) => /[0-9]/.test(p) },
+    { label: 'Un carácter especial', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p) },
   ];
 
   const handleChange = (e) => {
@@ -36,13 +36,13 @@ export default function Register() {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      toast.error('Las contrasenas no coinciden');
+      toast.error('Las contraseñas no coinciden');
       return;
     }
 
     const allValid = passwordRequirements.every((r) => r.test(form.password));
     if (!allValid) {
-      toast.error('La contrasena no cumple todos los requisitos');
+      toast.error('La contraseña no cumple todos los requisitos');
       return;
     }
 
@@ -78,7 +78,7 @@ export default function Register() {
             <UserPlus className="w-8 h-8 text-white" />
           </motion.div>
           <h1 className="text-3xl font-bold text-white">Crear cuenta</h1>
-          <p className="text-slate-400 mt-2">Registrate para comenzar a gestionar tus proyectos</p>
+          <p className="text-slate-400 mt-2">Regístrate para comenzar a gestionar tus proyectos</p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
@@ -123,7 +123,7 @@ export default function Register() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Telefono</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Teléfono</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
@@ -138,7 +138,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electronico *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico *</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -154,7 +154,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Contrasena *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Contraseña *</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -187,7 +187,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirmar contrasena *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirmar contraseña *</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -201,7 +201,7 @@ export default function Register() {
                 />
               </div>
               {form.confirmPassword && form.password !== form.confirmPassword && (
-                <p className="mt-1 text-xs text-red-400">Las contrasenas no coinciden</p>
+                <p className="mt-1 text-xs text-red-400">Las contraseñas no coinciden</p>
               )}
             </div>
 
@@ -225,9 +225,9 @@ export default function Register() {
 
           <div className="mt-6 text-center">
             <p className="text-slate-400 text-sm">
-              Ya tienes cuenta?{' '}
+              ¿Ya tienes cuenta?{' '}
               <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                Inicia sesion
+                Inicia sesión
               </Link>
             </p>
           </div>

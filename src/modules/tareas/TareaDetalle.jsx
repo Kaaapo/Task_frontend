@@ -38,7 +38,7 @@ export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
   };
 
   const handleDeleteComentario = async (comentarioId) => {
-    if (!confirm('Eliminar este comentario?')) return;
+    if (!confirm('¿Eliminar este comentario?')) return;
     try {
       await comentariosService.delete(tarea.id, comentarioId);
       loadComentarios();
@@ -101,7 +101,7 @@ export default function TareaDetalle({ tarea, onClose, onEdit, onRefresh }) {
 
           {tarea.descripcion && (
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Descripcion</h3>
+              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Descripción</h3>
               <p className="text-slate-800 dark:text-white text-sm whitespace-pre-wrap">{tarea.descripcion}</p>
             </div>
           )}

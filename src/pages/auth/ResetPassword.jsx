@@ -17,21 +17,21 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      toast.error('Las contrasenas no coinciden');
+      toast.error('Las contraseñas no coinciden');
       return;
     }
     if (form.password.length < 8) {
-      toast.error('La contrasena debe tener al menos 8 caracteres');
+      toast.error('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
     setLoading(true);
     try {
       await resetPassword(token, form.password);
-      toast.success('Contrasena cambiada exitosamente');
+      toast.success('Contraseña cambiada exitosamente');
       navigate('/login');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al cambiar la contrasena');
+      toast.error(error.response?.data?.message || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -67,13 +67,13 @@ export default function ResetPassword() {
             >
               <ShieldCheck className="w-8 h-8 text-white" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-white">Nueva contrasena</h1>
-            <p className="text-slate-400 mt-2">Ingresa tu nueva contrasena</p>
+            <h1 className="text-2xl font-bold text-white">Nueva contraseña</h1>
+            <p className="text-slate-400 mt-2">Ingresa tu nueva contraseña</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Nueva contrasena</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Nueva contraseña</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -95,7 +95,7 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirmar contrasena</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirmar contraseña</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -121,7 +121,7 @@ export default function ResetPassword() {
               ) : (
                 <>
                   <ShieldCheck className="w-5 h-5" />
-                  Cambiar contrasena
+                  Cambiar contraseña
                 </>
               )}
             </motion.button>

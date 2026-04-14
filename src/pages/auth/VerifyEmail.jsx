@@ -38,7 +38,7 @@ export default function VerifyEmail() {
     setResending(true);
     try {
       await reenviarVerificacion(resendEmail);
-      toast.success('Email de verificacion reenviado');
+      toast.success('Email de verificación reenviado');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error al reenviar');
     } finally {
@@ -73,15 +73,15 @@ export default function VerifyEmail() {
           <h1 className="text-2xl font-bold text-white mb-2">
             {status === 'loading' && 'Verificando...'}
             {status === 'success' && 'Email Verificado'}
-            {status === 'error' && 'Error de Verificacion'}
+            {status === 'error' && 'Error de Verificación'}
             {status === 'no-token' && 'Verificar Email'}
           </h1>
 
           <p className="text-slate-400 mb-6">
-            {status === 'loading' && 'Estamos verificando tu correo electronico'}
+            {status === 'loading' && 'Estamos verificando tu correo electrónico'}
             {status === 'success' && message}
             {status === 'error' && message}
-            {status === 'no-token' && 'Ingresa tu email para reenviar el enlace de verificacion'}
+            {status === 'no-token' && 'Ingresa tu email para reenviar el enlace de verificación'}
           </p>
 
           {(status === 'error' || status === 'no-token') && (
@@ -99,7 +99,7 @@ export default function VerifyEmail() {
                 disabled={resending}
                 className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
               >
-                {resending ? 'Reenviando...' : 'Reenviar verificacion'}
+                {resending ? 'Reenviando...' : 'Reenviar verificación'}
               </button>
             </form>
           )}
@@ -108,7 +108,7 @@ export default function VerifyEmail() {
             to="/login"
             className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
           >
-            Ir a Iniciar Sesion
+            Ir a Iniciar Sesión
           </Link>
         </div>
       </motion.div>

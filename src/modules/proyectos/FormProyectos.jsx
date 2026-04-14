@@ -79,12 +79,12 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Codigo</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Código</label>
             <input value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} className={inputClass} placeholder="PRY-001" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripcion</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
             <textarea
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
@@ -124,7 +124,7 @@ export default function FormProyectos({ onClose, onSave, initialData, empresas, 
                 <option value="BAJA">Baja</option>
                 <option value="MEDIA">Media</option>
                 <option value="ALTA">Alta</option>
-                <option value="CRITICA">Critica</option>
+                <option value="CRITICA">Crítica</option>
               </select>
             </div>
           </div>

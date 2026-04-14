@@ -28,7 +28,7 @@ export default function TipoProyecto() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (tipo) => {
-    if (!confirm(`Eliminar "${tipo.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar "${tipo.nombre}"?`)) return;
     try {
       await tiposProyectoService.delete(tipo.id);
       toast.success('Tipo eliminado');

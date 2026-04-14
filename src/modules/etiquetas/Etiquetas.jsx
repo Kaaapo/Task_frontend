@@ -28,7 +28,7 @@ export default function Etiquetas() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (etiqueta) => {
-    if (!confirm(`Eliminar la etiqueta "${etiqueta.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar la etiqueta "${etiqueta.nombre}"?`)) return;
     try {
       await etiquetasService.delete(etiqueta.id);
       toast.success('Etiqueta eliminada');

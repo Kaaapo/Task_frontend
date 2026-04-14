@@ -98,7 +98,7 @@ export default function Dashboard() {
         <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white">
           Hola, {user?.nombre} {user?.apellido}
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Aqui tienes un resumen de tu espacio de trabajo</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Aquí tienes un resumen de tu espacio de trabajo</p>
       </div>
 
       {/* Stats */}

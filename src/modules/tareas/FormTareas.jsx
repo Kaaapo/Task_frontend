@@ -77,13 +77,13 @@ export default function FormTareas({ onClose, onSave, initialData, proyectos, es
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Titulo <span className="text-red-500">*</span>
+              Título <span className="text-red-500">*</span>
             </label>
             <input required value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} className={inputClass} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripcion</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
             <textarea
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
@@ -116,11 +116,11 @@ export default function FormTareas({ onClose, onSave, initialData, proyectos, es
                 <option value="BAJA">Baja</option>
                 <option value="MEDIA">Media</option>
                 <option value="ALTA">Alta</option>
-                <option value="CRITICA">Critica</option>
+                <option value="CRITICA">Crítica</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha limite</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha límite</label>
               <input type="date" value={form.fechaLimite} onChange={(e) => setForm({ ...form, fechaLimite: e.target.value })} className={inputClass} />
             </div>
           </div>

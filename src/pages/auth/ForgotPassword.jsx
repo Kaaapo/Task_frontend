@@ -17,9 +17,9 @@ export default function ForgotPassword() {
     try {
       await solicitarReset(email);
       setSent(true);
-      toast.success('Se envio un enlace a tu correo');
+      toast.success('Se envió un enlace a tu correo');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al solicitar recuperacion');
+      toast.error(error.response?.data?.message || 'Error al solicitar recuperación');
     } finally {
       setLoading(false);
     }
@@ -42,11 +42,11 @@ export default function ForgotPassword() {
             >
               <Mail className="w-8 h-8 text-white" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-white">Recuperar contrasena</h1>
+            <h1 className="text-2xl font-bold text-white">Recuperar contraseña</h1>
             <p className="text-slate-400 mt-2">
               {sent
-                ? 'Revisa tu correo electronico'
-                : 'Ingresa tu email para recibir un enlace de recuperacion'}
+                ? 'Revisa tu correo electrónico'
+                : 'Ingresa tu email para recibir un enlace de recuperación'}
             </p>
           </div>
 
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
             <div className="text-center space-y-4">
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                 <p className="text-emerald-400 text-sm">
-                  Hemos enviado un enlace de recuperacion a <strong>{email}</strong>. 
+                  Hemos enviado un enlace de recuperación a <strong>{email}</strong>. 
                   Revisa tu bandeja de entrada y spam.
                 </p>
               </div>
@@ -68,7 +68,7 @@ export default function ForgotPassword() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electronico</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input

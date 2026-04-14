@@ -64,7 +64,7 @@ export default function FormEstados({ onClose, onSave, initialData }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripcion</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
             <textarea
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}

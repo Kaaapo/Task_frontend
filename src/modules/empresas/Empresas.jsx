@@ -28,7 +28,7 @@ export default function Empresas() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (empresa) => {
-    if (!confirm(`Eliminar la empresa "${empresa.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar la empresa "${empresa.nombre}"?`)) return;
     try {
       await empresasService.delete(empresa.id);
       toast.success('Empresa eliminada');

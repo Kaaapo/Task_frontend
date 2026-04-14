@@ -37,7 +37,7 @@ export default function Proyectos() {
   useEffect(() => { loadData(); }, []);
 
   const handleDelete = async (proyecto) => {
-    if (!confirm(`Eliminar el proyecto "${proyecto.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar el proyecto "${proyecto.nombre}"?`)) return;
     try {
       await proyectosService.delete(proyecto.id);
       toast.success('Proyecto eliminado');
@@ -106,7 +106,7 @@ export default function Proyectos() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, codigo o empresa..."
+          placeholder="Buscar por nombre, código o empresa..."
           className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         />
       </div>

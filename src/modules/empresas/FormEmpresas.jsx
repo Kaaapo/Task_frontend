@@ -38,8 +38,8 @@ export default function FormEmpresas({ onClose, onSave, initialData, estados }) 
     { name: 'nombre', label: 'Nombre', required: true },
     { name: 'nit', label: 'NIT' },
     { name: 'correo', label: 'Correo', type: 'email' },
-    { name: 'telefono', label: 'Telefono' },
-    { name: 'direccion', label: 'Direccion' },
+    { name: 'telefono', label: 'Teléfono' },
+    { name: 'direccion', label: 'Dirección' },
     { name: 'sector', label: 'Sector' },
   ];
 
@@ -84,7 +84,7 @@ export default function FormEmpresas({ onClose, onSave, initialData, estados }) 
           ))}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripcion</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
             <textarea
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}

@@ -17,10 +17,10 @@ export default function Login() {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      toast.success('Inicio de sesion exitoso');
+      toast.success('Inicio de sesión exitoso');
       navigate('/dashboard');
     } catch (error) {
-      const msg = error.response?.data?.message || 'Error al iniciar sesion';
+      const msg = error.response?.data?.message || 'Error al iniciar sesión';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -45,13 +45,13 @@ export default function Login() {
             <LogIn className="w-8 h-8 text-white" />
           </motion.div>
           <h1 className="text-3xl font-bold text-white">Task Manager</h1>
-          <p className="text-slate-400 mt-2">Inicia sesion en tu cuenta</p>
+          <p className="text-slate-400 mt-2">Inicia sesión en tu cuenta</p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electronico</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -60,13 +60,13 @@ export default function Login() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="tu@email.com"
+                  placeholder="tucorreo@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Contrasena</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Contraseña</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -89,7 +89,7 @@ export default function Login() {
 
             <div className="flex items-center justify-end">
               <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                Olvidaste tu contrasena?
+                ¿Olvidaste tu contraseña?
               </Link>
             </div>
 
@@ -105,7 +105,7 @@ export default function Login() {
               ) : (
                 <>
                   <LogIn className="w-5 h-5" />
-                  Iniciar Sesion
+                  Iniciar Sesión
                 </>
               )}
             </motion.button>
@@ -113,9 +113,9 @@ export default function Login() {
 
           <div className="mt-6 text-center">
             <p className="text-slate-400 text-sm">
-              No tienes cuenta?{' '}
+              ¿No tienes cuenta?{' '}
               <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                Registrate
+                Regístrate
               </Link>
             </p>
           </div>
