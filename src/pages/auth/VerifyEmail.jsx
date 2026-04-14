@@ -68,7 +68,7 @@ export default function VerifyEmail() {
     try {
       const data = await reenviarVerificacion(resendEmail);
       if (data?.correoEnviado === false) {
-        toast.warning(data?.mensaje || 'No se pudo enviar el correo. Revisa la configuración SMTP del servidor.');
+        toast.warning(data?.mensaje || 'No se pudo enviar el correo. Revisa SendGrid (API key y remitente verificado).');
       } else {
         toast.success('Email de verificación reenviado');
       }
