@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, ArrowLeft, Send } from 'lucide-react';
+import { Mail, ArrowLeft, Send, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { getErrorMessage } from '../../shared/lib/errorUtils';
@@ -11,16 +11,22 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
     try {
-      await solicitarReset(email);
+      const data = await solicitarReset(email);
+      setSuccessMessage(data?.mensaje || 'Te hemos enviado un correo con instrucciones para restablecer tu contraseña.');
       setSent(true);
-      toast.success('Se envió un enlace a tu correo');
+      toast.success('Correo enviado');
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Error al solicitar la recuperación de contraseña'));
+      const msg = getErrorMessage(error, 'Error al solicitar la recuperación de contraseña');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -54,13 +60,12 @@ export default function ForgotPassword() {
           {sent ? (
             <div className="text-center space-y-4">
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <p className="text-emerald-400 text-sm">
-                  Hemos enviado un enlace de recuperación a <strong>{email}</strong>. 
-                  Revisa tu bandeja de entrada y spam.
-                </p>
+                <p className="text-emerald-400 text-sm">{successMessage}</p>
+                <p className="text-emerald-400/80 text-xs mt-2">Enviado a <strong>{email}</strong></p>
               </div>
               <button
-                onClick={() => setSent(false)}
+                type="button"
+                onClick={() => { setSent(false); setSuccessMessage(''); setErrorMessage(''); }}
                 className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
               >
                 Enviar a otro correo
@@ -68,6 +73,12 @@ export default function ForgotPassword() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {errorMessage && (
+                <div className="flex gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-left">
+                  <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300">{errorMessage}</p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo electrónico</label>
                 <div className="relative">
@@ -76,7 +87,7 @@ export default function ForgotPassword() {
                     type="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); if (errorMessage) setErrorMessage(''); }}
                     className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     placeholder="tu@email.com"
                   />
