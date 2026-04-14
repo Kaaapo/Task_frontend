@@ -24,6 +24,18 @@ export function getErrorMessage(error, fallback = 'Ha ocurrido un error inespera
     return 'No se pudo conectar con el servidor. Verifica que el servidor esté activo y tu conexión a internet.';
   }
 
+  if (error.response?.status === 409) {
+    return 'No se puede completar la operación porque este registro está siendo utilizado por otros datos.';
+  }
+
+  if (error.response?.status === 403) {
+    return 'No tienes permisos para realizar esta acción.';
+  }
+
+  if (error.response?.status >= 500) {
+    return 'Ha ocurrido un error en el servidor. Por favor, intenta de nuevo más tarde.';
+  }
+
   if (error.message) return error.message;
 
   return fallback;

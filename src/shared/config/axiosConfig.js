@@ -30,12 +30,17 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const AUTH_ROUTES = ['/auth/login', '/auth/registro', '/auth/refresh', '/auth/logout',
+  '/auth/verificar-email', '/auth/reenviar-verificacion', '/auth/solicitar-reset', '/auth/reset-password'];
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest?.url || '';
+    const isAuthRoute = AUTH_ROUTES.some((route) => requestUrl.includes(route));
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

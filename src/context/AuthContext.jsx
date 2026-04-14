@@ -33,8 +33,11 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
       return data;
-    } catch {
-      logout();
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        logout();
+      }
       return null;
     }
   };
