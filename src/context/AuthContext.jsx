@@ -81,7 +81,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const verificarEmail = async (token) => {
-    const { data } = await axiosInstance.get(`/auth/verificar-email?token=${token}`);
+    const { data } = await axiosInstance.get('/auth/verificar-email', {
+      params: { token },
+    });
     return data;
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
@@ -6,9 +6,13 @@ import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { getErrorMessage } from '../../shared/lib/errorUtils';
 
+const STORAGE_PREFIX = 'emailVerified:';
+
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const rawToken = searchParams.get('token');
+  const token = rawToken ? rawToken.trim() : null;
+  const storageKey = useMemo(() => (token ? `${STORAGE_PREFIX}${token}` : null), [token]);
   const { verificarEmail, reenviarVerificacion } = useAuth();
   const [status, setStatus] = useState('loading'); // loading, success, error
   const [message, setMessage] = useState('');
@@ -16,23 +20,47 @@ export default function VerifyEmail() {
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      verify();
-    } else {
+    if (!token) {
       setStatus('no-token');
+      return;
     }
-  }, [token]);
 
-  const verify = async () => {
-    try {
-      const data = await verificarEmail(token);
+    if (storageKey && sessionStorage.getItem(storageKey) === '1') {
       setStatus('success');
-      setMessage(data.mensaje || 'Email verificado correctamente');
-    } catch (error) {
-      setStatus('error');
-      setMessage(getErrorMessage(error, 'Error al verificar el email'));
+      setMessage('Tu correo electrónico ya fue verificado. Puedes iniciar sesión.');
+      return;
     }
-  };
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await verificarEmail(token);
+        if (storageKey) sessionStorage.setItem(storageKey, '1');
+        if (!cancelled) {
+          setStatus('success');
+          setMessage(data.mensaje || 'Correo verificado correctamente.');
+        }
+      } catch (error) {
+        if (storageKey && sessionStorage.getItem(storageKey) === '1') {
+          if (!cancelled) {
+            setStatus('success');
+            setMessage('Tu correo electrónico ya fue verificado. Puedes iniciar sesión.');
+          }
+          return;
+        }
+        if (!cancelled) {
+          setStatus('error');
+          setMessage(getErrorMessage(error, 'Error al verificar el email'));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // verificarEmail es estable en la práctica; no incluirlo evita re-ejecuciones por referencia nueva del contexto
+  }, [token, storageKey]);
 
   const handleResend = async (e) => {
     e.preventDefault();
